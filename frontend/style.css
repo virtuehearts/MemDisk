@@ -4,6 +4,8 @@ body { background: #222; color: #fff; font-family: "Courier New", monospace; }
 #input { width: 100%; padding: 8px; background: #222; color: #fff; border: 1px solid #333; font-size: 1em; resize: vertical; min-height: 48px; border-radius: 4px; }
 pre { background: #1a1a1a; color: #bada55; padding: 8px; border-radius: 4px; margin: 8px 0; line-height: 1.4; white-space: pre-wrap; word-break: break-word; }
 pre.error { color: #ff6b6b; }
+pre.system { color: #ffd580; border-left: 3px solid #ffd580; padding-left: 12px; }
+pre.assistant { color: #9fd1ff; }
 details { margin-top: 6px; }
 .echo { color: #6cf; margin-bottom: 4px; }
 .banner { color: #9cf; font-weight: bold; }
