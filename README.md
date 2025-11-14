@@ -45,8 +45,18 @@ Large language models lack persistent memory, treating each query as an isolated
 
 ## License
 
-MIT
+MIT /  Apache 2.0 
 
 ## Contact
 
 Virtuehearts, darknet.ca labs, admin@darknet.ca
+
+---
+
+**Instagram:** @virtuehearts  
+**X:** Virtue_hearts  
+**Email:** admin@darknet.ca  
+**Webpage:** [https://darknet.ca](https://darknet.ca)  
+**Location:** Toronto, Canada  
+**Donations:** Bitcoin:  `bc1qzs4wc5thvzj607njf7h69gxkmwfuwswj3ujq6m`  
+darknet.ca powered by AlmaLinux 8 64-Bit | Lowendbox VPS
