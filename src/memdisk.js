@@ -34,11 +34,17 @@ function trimDiskContent(content) {
 }
 
 // Build context for OpenRouter (fit to LLM context limits)
-async function buildContext(routing, prompt, encryptionKey = null) {
+async function buildContext(routing, prompt, encryptionKey = null, inlineDisks = []) {
   const memoryChunks = [];
   for (const disk of routing.relevantDisks) {
     const diskPayload = routing.loadedDisks?.[disk] || await loadDisk(disk, encryptionKey);
     memoryChunks.push({ disk, content: trimDiskContent(diskPayload) });
+  }
+  if (Array.isArray(inlineDisks) && inlineDisks.length) {
+    for (const inline of inlineDisks) {
+      if (!inline?.name || inline.content === undefined) continue;
+      memoryChunks.push({ disk: inline.name, content: trimDiskContent(inline.content) });
+    }
   }
   return { prompt, memory: memoryChunks, routingMeta: routing };
 }

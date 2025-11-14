@@ -1,8 +1,9 @@
 // OpenRouter orchestrator for main reasoning + response generation
 const OPENROUTER_URL = process.env.OPENROUTER_API_URL || "https://openrouter.ai/api/v1/chat/completions";
-const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || "openrouter/auto";
+const DEFAULT_MODEL = process.env.OPENROUTER_MODEL || "openrouter/auto";
 const MAX_TOKENS = parseInt(process.env.OPENROUTER_MAX_TOKENS || "512", 10);
 const TEMPERATURE = parseFloat(process.env.OPENROUTER_TEMPERATURE || "0.7");
+let currentModel = DEFAULT_MODEL;
 
 function serializeMemory(memory) {
   if (!memory?.length) {
@@ -48,7 +49,7 @@ async function callOpenRouter(messages) {
   };
 
   const body = {
-    model: OPENROUTER_MODEL,
+    model: currentModel,
     messages,
     max_tokens: MAX_TOKENS,
     temperature: TEMPERATURE,
@@ -73,9 +74,25 @@ async function callOpenRouter(messages) {
   return message.trim();
 }
 
+function setModel(model) {
+  if (!model || typeof model !== "string") {
+    throw new Error("Model name must be a non-empty string");
+  }
+  currentModel = model.trim();
+}
+
+function getModel() {
+  return currentModel;
+}
+
 module.exports = {
   async sendQuery(context) {
     const messages = buildMessages(context);
     return callOpenRouter(messages);
+  },
+  setModel,
+  getModel,
+  getDefaults() {
+    return { maxTokens: MAX_TOKENS, temperature: TEMPERATURE };
   },
 };
