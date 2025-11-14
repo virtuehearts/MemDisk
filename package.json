@@ -1,0 +1,16 @@
+{
+  "name": "memdisk",
+  "version": "0.1.0",
+  "description": "MemDisk: A Peer-to-Peer Distributed Memory System for Large Language Models.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "author": "virtuehearts",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.19.0",
+    "sqlite3": "^5.1.6",
+    "crypto": "^1.0.1"
+  }
+}
