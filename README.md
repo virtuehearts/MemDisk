@@ -15,16 +15,16 @@ Large language models lack persistent memory, treating each query as an isolated
 ## Main Components
 
 - **Node.js Backend**: Handles memory management, encryption, SQLite storage, and API routing.
-- **Gemma (Classifier Monk)**: Local LLM, limited to 32k tokens, routes queries to select relevant MemDisk memory.
-- **OpenRouter API**: Sends user prompt + curated memory context to a large external LLM (supports 128k context).
+- **Gemma 1B (Memory Monk)**: Local LLM routed through Ollama that writes, rewrites, downloads, and curates memdisks so they're searchable (dark poetry, Punjabi ghazals, etc.).
+- **OpenRouter Models**: Cloud LLMs that take the curated memories and generate the final response for the user.
 - **Web Terminal**: MSDOS-like AI-OS for interactive sessions, loading memory disks, executing commands.
 
 ## How It Works
 
-1. User interacts in terminal front-end.  
-2. Commands (e.g. `load dark_poetry.dsk`) select local memory files.  
-3. Gemma routes/retrieves relevant memory chunks.  
-4. Main LLM (via OpenRouter) receives full context (prompt + memory) for processing.
+1. User interacts in terminal front-end.
+2. Commands (e.g. `load dark_poetry.dsk`) select local memory files.
+3. The Gemma 1B Memory Monk (running locally) reviews every floppy and chooses what matters.
+4. The curated context is streamed to OpenRouter, which performs the heavy reasoning and response generation.
 5. Sanitized output displayed to user (memories and ops context stripped).
 
 ## Features
@@ -32,16 +32,91 @@ Large language models lack persistent memory, treating each query as an isolated
 - Finite local memory units (1.44MB each, as `.dsk` JSON files)
 - SHA256 + Bitcoin-style keypair crypto
 - SQLite for storage, audit trail, versioning
-- Classifier Monk as local router (Gemma LLM)
-- Context injection protocol
+- Classifier Monk powered by local Gemma 1B while the Oracle lives on OpenRouter
+- Context injection protocol that trims floppy JSON to fit LLM limits
 - Optional disk encryption
-- Modular terminal web frontend
+- Modular terminal web frontend with routing telemetry
+- Curated memdisks for any vibe (dark poetry, Punjabi poetry, etc.) that can be shared and remixed
+
+## LLM Roles
+
+- **Local (Gemma 1B via Ollama):** Handles all memory management—generating new memdisks, rewriting or downloading content into them, tagging/indexing, and ranking disks for a query.
+- **Remote (OpenRouter):** Receives only the pruned memories + user prompt and produces the final conversational answer.
 
 ## Getting Started
 
-1. Install packages: `npm install`
-2. Start backend server: `npm run start`
-3. Open `frontend/index.html` in your browser.
+### 1. Prepare a local Gemma 1B runner (memory-only)
+
+Install [Ollama](https://ollama.com/) (macOS, Linux, or Windows WSL) and start the daemon. Pull the smaller Gemma 1B/2B variant that can comfortably live on your laptop—this runner never leaves your machine and is used strictly for memory ops (disk writing, rewriting, downloading, routing).
+
+```bash
+ollama pull gemma:2b   # gemma:1.1b or 2b both work for memory; pick what fits your hardware
+ollama serve
+```
+
+MemDisk will call `http://localhost:11434/api/generate` by default. Use these environment variables to customize the local LLM connection:
+
+| Variable | Description | Default |
+| --- | --- | --- |
+| `LOCAL_LLM_MODEL` | Ollama model slug (e.g., `gemma:2b`, `gemma:2b-instruct`) | `gemma:2b` |
+| `LOCAL_LLM_URL` | Base URL for the Ollama HTTP API | `http://localhost:11434` |
+| `MEMDISK_LLM_MODE` | `ollama` for real inference, `mock` for a deterministic stub | `ollama` |
+| `MEMDISK_LLM_MAX_TOKENS` | Max response tokens for the answer step | `256` |
+
+> **No GPU?** Set `MEMDISK_LLM_MODE=mock` to exercise the whole pipeline with a built-in placeholder response until you connect to a real model.
+
+### 2. Configure OpenRouter (remote processing)
+
+OpenRouter handles the actual dialog/analysis. Grab an API key from [https://openrouter.ai/](https://openrouter.ai/) and export it before starting the server:
+
+```bash
+export OPENROUTER_API_KEY="sk-or-v1-..."
+export OPENROUTER_MODEL="openrouter/auto"    # or any model you prefer
+export OPENROUTER_APP_NAME="MemDisk"
+```
+
+| Variable | Description | Default |
+| --- | --- | --- |
+| `OPENROUTER_API_KEY` | Required API key for OpenRouter | _none_ |
+| `OPENROUTER_MODEL` | Model slug to hit via OpenRouter | `openrouter/auto` |
+| `OPENROUTER_API_URL` | Override endpoint URL | `https://openrouter.ai/api/v1/chat/completions` |
+| `OPENROUTER_MAX_TOKENS` | Cap on output tokens returned | `512` |
+| `OPENROUTER_TEMPERATURE` | Sampling temperature for responses | `0.7` |
+| `OPENROUTER_APP_NAME` | Name reported to OpenRouter | `MemDisk` |
+| `OPENROUTER_SITE_URL` | Referer header (use your deploy URL) | `https://github.com/virtuehearts/memdisk` |
+
+### 3. Install Node dependencies
+
+```bash
+npm install
+```
+
+### 4. Start the MemDisk backend
+
+```bash
+npm run start
+```
+
+This launches the Express API on `http://localhost:3000`.
+
+### 5. Launch the AI-OS terminal
+
+Open `frontend/index.html` in your browser (or serve the `frontend/` folder with any static HTTP server). The UI will communicate with the backend through the same origin.
+
+## Terminal Commands
+
+Inside the browser terminal UI you can run:
+
+```
+disks                 # list .dsk files inside /disk
+load example.dsk      # load a floppy into the current session
+mem                   # show currently mounted disks
+ask write a poem ...  # send the prompt + mounted floppies to OpenRouter (after Gemma curates)
+clear                 # clear the terminal
+help                  # see this list again
+```
+
+Each `ask` call shows the sanitized OpenRouter response plus an expandable "Routing" block that reveals which disks Gemma selected, why they were chosen, and the raw classifier output.
 
 ## License
 

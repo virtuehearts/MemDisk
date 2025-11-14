@@ -9,8 +9,8 @@
   "author": "virtuehearts",
   "license": "MIT",
   "dependencies": {
+    "crypto": "^1.0.1",
     "express": "^4.19.0",
-    "sqlite3": "^5.1.6",
-    "crypto": "^1.0.1"
+    "sqlite3": "^5.1.6"
   }
 }

@@ -3,3 +3,5 @@ body { background: #222; color: #fff; font-family: "Courier New", monospace; }
 #output { min-height: 300px; padding-bottom: 10px; }
 #input { width: 100%; padding: 8px; background: #222; color: #fff; border: none; font-size: 1em; }
 pre { background: #1a1a1a; color: #bada55; padding: 6px; border-radius: 4px; margin: 8px 0; }
+pre.error { color: #ff6b6b; }
+details { margin-top: 6px; }
