@@ -123,7 +123,7 @@ Each `/ask` call shows the sanitized OpenRouter response plus an expandable "Rou
 
 ## Default Persona & Chat UX
 
-Maya is the default AI-OS persona (MemDisk ver 0.1b). She behaves like a regular chatbot—type normal sentences and the terminal automatically routes them through `/ask`. The banner prints a **system directive** describing how to mount disks, personalize the experience, and even rename Maya. That directive lives in [`default.md`](default.md); use it as a template for crafting new `.dsk` personas. Load a custom disk with `/disks load <persona.dsk>` (or the raw loader) and Maya will immediately adopt the new voice while still supporting the command deck.
+Maya is the default AI-OS persona (MemDisk ver 0.1b). She behaves like a regular chatbot—type normal sentences and the terminal automatically routes them through `/ask`. The banner prints a **system directive** describing how to mount disks, personalize the experience, and even rename Maya. That directive (along with her greeting and metadata) now lives in [`disk/maya.dsk`](disk/maya.dsk), and the terminal auto-mounts it on boot so Maya's baseline memory is always active. Use it as the template for crafting new `.dsk` personas. Load a custom disk with `/disks load <persona.dsk>` (or the raw loader) and Maya will immediately adopt the new voice while still supporting the command deck.
 
 ## License
 
