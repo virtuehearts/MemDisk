@@ -1,27 +1,81 @@
-// Local LLM orchestrator (Gemma via Ollama)
-const localLLM = require("./localLLM");
+// OpenRouter orchestrator for main reasoning + response generation
+const OPENROUTER_URL = process.env.OPENROUTER_API_URL || "https://openrouter.ai/api/v1/chat/completions";
+const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || "openrouter/auto";
+const MAX_TOKENS = parseInt(process.env.OPENROUTER_MAX_TOKENS || "512", 10);
+const TEMPERATURE = parseFloat(process.env.OPENROUTER_TEMPERATURE || "0.7");
 
-function buildPrompt(context) {
-  const header = `You are Jero, the MemDisk AI. Use the supplied floppy memories to answer the user.`;
-  const memoryText = context.memory
+function serializeMemory(memory) {
+  if (!memory?.length) {
+    return "(No memdisks were mounted for this query)";
+  }
+  return memory
     .map((chunk, idx) => {
-      const body = typeof chunk.content === "string"
+      const rendered = typeof chunk.content === "string"
         ? chunk.content
         : JSON.stringify(chunk.content, null, 2);
-      return `Memory ${idx + 1}: (${chunk.disk})\n${body}`;
+      return `Disk ${idx + 1}: ${chunk.disk}\n${rendered}`;
     })
     .join("\n\n");
+}
 
-  return `${header}\n\nUser Prompt:\n${context.prompt}\n\nLoaded Memories:\n${memoryText}`;
+function buildMessages(context) {
+  const system = {
+    role: "system",
+    content:
+      "You are Jero, the MemDisk AI. A local Gemma monk already curated the disks you receive. Use them as memory, cite disk names when relevant, and focus on actionable answers.",
+  };
+
+  const memoryBlock = serializeMemory(context.memory);
+  const user = {
+    role: "user",
+    content: `User Prompt:\n${context.prompt}\n\nMounted MemDisks:\n${memoryBlock}`,
+  };
+
+  return [system, user];
+}
+
+async function callOpenRouter(messages) {
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) {
+    throw new Error("OPENROUTER_API_KEY is not set. Set it to call the OpenRouter API.");
+  }
+
+  const headers = {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${apiKey}`,
+    "HTTP-Referer": process.env.OPENROUTER_SITE_URL || "https://github.com/virtuehearts/memdisk",
+    "X-Title": process.env.OPENROUTER_APP_NAME || "MemDisk",
+  };
+
+  const body = {
+    model: OPENROUTER_MODEL,
+    messages,
+    max_tokens: MAX_TOKENS,
+    temperature: TEMPERATURE,
+  };
+
+  const res = await fetch(OPENROUTER_URL, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`OpenRouter request failed (${res.status}): ${errText}`);
+  }
+
+  const payload = await res.json();
+  const message = payload.choices?.[0]?.message?.content;
+  if (!message) {
+    throw new Error("OpenRouter response did not include any content");
+  }
+  return message.trim();
 }
 
 module.exports = {
   async sendQuery(context) {
-    const prompt = buildPrompt(context);
-    const response = await localLLM.generateText(prompt, {
-      maxTokens: parseInt(process.env.MEMDISK_LLM_MAX_TOKENS || "256", 10),
-      temperature: parseFloat(process.env.MEMDISK_LLM_TEMP || "0.6"),
-    });
-    return response;
-  }
+    const messages = buildMessages(context);
+    return callOpenRouter(messages);
+  },
 };
