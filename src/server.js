@@ -1,4 +1,5 @@
 // Main API server for MemDisk
+require("./env").loadEnv();
 const express = require("express");
 const fs = require("fs");
 const path = require("path");

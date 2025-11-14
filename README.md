@@ -38,12 +38,27 @@ Large language models lack persistent memory, treating each query as an isolated
 - Modular terminal web frontend with routing telemetry
 - Curated memdisks for any vibe (dark poetry, Punjabi poetry, etc.) that can be shared and remixed
 
+## Roadmap: Making It Truly P2P
+
+MemDisk 0.1B still ships as a "local-first but centrally shared" prototype. The true peer-to-peer layer is on deck:
+
+- **Transport options:** Torrents/IPFS bundles for `.dsk` packs plus signed magnet files that describe their provenance.
+- **Git-style syncing:** Each `.dsk` keeps a hash chain. Upcoming `memdisk sync` will let two peers fast-forward changes over SSH or any git remote.
+- **Discovery:** A gossip table per node advertises curated disks (topic tags, signatures, file hashes). Nodes can follow curators they trust.
+- **Sharing etiquette:** Every `.dsk` contains routing hints + licensing so receivers know how to mount/remix. Expect a CLI helper that packages/announces curated disks automatically.
+
+Until those pieces land, everything stays on your machine—share `.dsk` files manually (email, git, USB) so no one expects a built-in swarm.
+
 ## LLM Roles
 
 - **Local (Gemma 1B via Ollama):** Handles all memory management—generating new memdisks, rewriting or downloading content into them, tagging/indexing, and ranking disks for a query.
 - **Remote (OpenRouter):** Receives only the pruned memories + user prompt and produces the final conversational answer.
 
 ## Getting Started
+
+### 0. Copy the environment template (.env + dotenv)
+
+`cp .env.example .env` and edit anything you need. The backend auto-loads the file via a lightweight dotenv loader (`src/env.js`), so `npm run start` just works with whatever variables you set.
 
 ### 1. Prepare a local Gemma 1B runner (memory-only)
 
@@ -99,9 +114,19 @@ npm run start
 
 This launches the Express API on `http://localhost:3000`.
 
-### 5. Launch the AI-OS terminal
+### 5. Launch everything with one command
 
-Open `frontend/index.html` in your browser (or serve the `frontend/` folder with any static HTTP server). The UI will communicate with the backend through the same origin.
+```bash
+npm run dev
+```
+
+The script runs the backend on port 3000 and serves `frontend/` on `http://localhost:4173`, so you can click once and use `/disks` immediately.
+
+### 6. Launch the AI-OS terminal (manual option)
+
+Prefer manual control? Open `frontend/index.html` in your browser (or serve the folder with any static HTTP server). The UI will communicate with the backend through the same origin.
+
+> **Quick mock demo:** No GPU? Clone the repo, copy `.env.example`, then run `MEMDISK_LLM_MODE=mock npm run dev`. You'll get deterministic placeholder answers while still exercising routing + disk loading.
 
 ## Terminal Commands
 
@@ -121,13 +146,62 @@ The AI-OS web terminal uses slash commands that mirror the `frontend/terminal.js
 
 Each `/ask` call shows the sanitized OpenRouter response plus an expandable "Routing" block that reveals which disks Gemma selected, why they were chosen, and the raw classifier output. Inline disks you compose through the raw loader are tagged as `[inline]` so you know which memories came from the current session.
 
+## Example Session: Dark Poetry Disk
+
+`disk/dark_poetry.dsk` ships with Punjabi ghazal scaffolds so you can see a full end-to-end run:
+
+```
+/disks list
+> maya.dsk
+> dark_poetry.dsk
+> virtueism_mirror.dsk
+
+/disks load dark_poetry.dsk
+> Mounted dark_poetry.dsk — Nocturnal ghazal codex curated by virtuehearts.
+
+/ask write me a new ghazal about lost cities
+> Rain rehearsed encrypted vows. (OpenRouter response trimmed.)
+```
+
+Routing output for that `/ask` shows how MemDisk differs from "just throw notes into context":
+
+```
+Routing — Gemma 1B Memory Monk
+Selected disks:
+- dark_poetry.dsk (score 0.92)
+  Reason: prompt mentions "ghazal" + "lost cities"; disk marked "South Asian gothic".
+
+Chunks passed upstream:
+1. ghazal_templates[0] — "Ghost Platforms" template for lost city imagery.
+2. fragments.surge-01 — river + ruins metaphor to anchor stanza two.
+```
+
+Only those classifier-picked slices go to OpenRouter, so you can inspect exactly why each line shows up in the final poem.
+
+## Safety & Privacy Model
+
+- **Stays local:** Entire `.dsk` files, encryption keys, SQLite history, and raw terminal transcripts never leave your machine.
+- **Can leave (opt-in):** Only the classifier-selected excerpts + your current prompt are sent to OpenRouter (or whichever remote endpoint you configure).
+- **Gemma's role:** Local Gemma 1B/2B handles curation, tagging, compression, and routing. It is the only model that reads full disks.
+- **Remote role:** OpenRouter (or any API-compatible endpoint) receives the curated payload and produces the final answer.
+- **Air-gapped option:** Point `OPENROUTER_API_URL` to a local big model endpoint or set `MEMDISK_LLM_MODE=mock` to keep everything offline. Swap in your own HTTPS endpoint if you want remote reasoning on infrastructure you fully control.
+
 ## Default Persona & Chat UX
 
 Maya is the default AI-OS persona (MemDisk ver 0.1b). She behaves like a regular chatbot—type normal sentences and the terminal automatically routes them through `/ask`. The banner prints a **system directive** describing how to mount disks, personalize the experience, and even rename Maya. That directive (along with her greeting and metadata) now lives in [`disk/maya.dsk`](disk/maya.dsk), and the terminal auto-mounts it on boot so Maya's baseline memory is always active. Use it as the template for crafting new `.dsk` personas. Load a custom disk with `/disks load <persona.dsk>` (or the raw loader) and Maya will immediately adopt the new voice while still supporting the command deck.
 
 ## License
 
-MIT /  Apache 2.0 
+MIT /  Apache 2.0
+
+## Roadmap
+
+- **0.1B (today):** Local memory + terminal UI, deterministic mock mode, sample persona disks.
+- **Next:**
+  - True P2P `.dsk` sharing (torrents/IPFS bundles, git-style sync handshakes, gossip discovery).
+  - Disk marketplaces + curator bundles straight from the terminal.
+  - Visual disk viewer so you can browse JSON contents in the browser.
+  - Plugin hooks so other apps can mount a MemDisk instead of rolling their own memory layer.
 
 ## Contact
 

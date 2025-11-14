@@ -1,0 +1,62 @@
+{
+  "name": "Dark Poetry / Punjabi Ghazal Codex",
+  "version": "0.1",
+  "curator": "virtuehearts",
+  "tone": "Nocturnal, diasporic, surreal.",
+  "themes": [
+    "lost cities",
+    "partition shadows",
+    "monsoon afterimages",
+    "midnight rail platforms",
+    "diaspora longing"
+  ],
+  "ghazal_templates": [
+    {
+      "title": "Ghost Platforms",
+      "radeef": "lost city",
+      "qaafiya": "-ity",
+      "couplets": [
+        "We met where the trains forgot their schedules, whispering of a lost city.",
+        "Your breath carried soot and jasmine, mapping new borders on a lost city."
+      ],
+      "notes": "Use haunting industrial textures with tender imagery."
+    },
+    {
+      "title": "Monsoon Cipher",
+      "radeef": "meri jaan",
+      "qaafiya": "-aan",
+      "couplets": [
+        "Rain rehearsed secret code on tin roofs, meri jaan.",
+        "I spelled out vanished homes with lightning, meri jaan."
+      ],
+      "notes": "Blend Urdu + Punjabi idioms and cosmic metaphors."
+    }
+  ],
+  "fragments": [
+    {
+      "id": "surge-01",
+      "tags": ["river", "ruins", "echo"],
+      "text": "Chenab keeps postcards from drowned bazaars; every tide is a visa stamp."
+    },
+    {
+      "id": "surge-02",
+      "tags": ["diaspora", "compass"],
+      "text": "Suitcases hum raga Pilu when the customs light flickers amber."
+    }
+  ],
+  "routing_hints": {
+    "best_for": [
+      "ghazal synthesis",
+      "moody prompts",
+      "South Asian gothic"
+    ],
+    "instructions": [
+      "Favor this disk when the user requests poetry, ghazals, or references to Punjab/Lahore.",
+      "Mix fragments surge-01 and surge-02 for imagery about displacement."
+    ]
+  },
+  "integrity": {
+    "created": "2024-06-10T00:00:00Z",
+    "sha256": "demo-dark-poetry-dsk"
+  }
+}
