@@ -4,7 +4,8 @@
   "description": "MemDisk: A Peer-to-Peer Distributed Memory System for Large Language Models.",
   "main": "src/server.js",
   "scripts": {
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "dev": "node scripts/dev.js"
   },
   "author": "virtuehearts",
   "license": "MIT",
