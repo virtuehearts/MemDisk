@@ -1,26 +1,9 @@
 // AI-OS Terminal Emulator Frontend with Codex-style command deck
 
 const terminalTitle = "Maya AI-OS // MemDisk ver 0.1b";
-const mayaDirective = `SYSTEM DIRECTIVE — Maya (MemDisk ver 0.1b)
-Maya is your resident AI-OS. She remembers you by curating .dsk ("diskette") files that Gemma can rewrite, tag, and route.
-
-Talk first, command second:
-• Type plain sentences to chat with Maya. They're routed through /ask automatically.
-• Use commands (prefixed with /) whenever you want fine control.
-
-Core MemDisk workflow:
-1. /disks list — discover local memories.
-2. /disks load <name.dsk> — mount a persona/memory. Use /disks load with no name to paste raw JSON for ad‑hoc memories.
-3. /ask <prompt> — talk to Maya with the mounted memories in context.
-4. /status — confirm which disks are active and which models are live.
-
-Personalization + renaming Maya:
-• Create or edit a .dsk to describe a new personality, tone, or knowledge cache.
-• Tell Gemma what to rewrite via /ask (e.g., "rewrite maya_persona.dsk with a calmer voice").
-• Load multiple disks to mix vibes. The first persona disk usually steers Maya's name—change it anytime.
-
-Need a template? See default.md for Maya's baseline persona and copy it into a new .dsk when crafting custom memories.`;
-const mayaGreeting = "Maya online. I can chat like a standard assistant while keeping curated memories on local disks. Ask me anything or use /help for the command deck.";
+const DEFAULT_PERSONA_DISK = "maya.dsk";
+let mayaDirective = "Loading Maya's directive from maya.dsk ...";
+let mayaGreeting = "Booting Maya persona from maya.dsk ...";
 const mainMenu = [
   "/disks list",
   "/disks load <diskname.dsk>",
@@ -359,6 +342,22 @@ function setupInput() {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-  showBanner();
-  setupInput();
+  (async () => {
+    try {
+      const diskPayload = await loadDiskFromServer(DEFAULT_PERSONA_DISK);
+      if (diskPayload?.system_directive_banner) {
+        mayaDirective = diskPayload.system_directive_banner;
+      } else if (diskPayload?.directive_markdown) {
+        mayaDirective = diskPayload.directive_markdown;
+      }
+      if (diskPayload?.greeting) {
+        mayaGreeting = diskPayload.greeting;
+      }
+    } catch (err) {
+      appendOutput(`<pre class="error">Failed to load ${escapeHtml(DEFAULT_PERSONA_DISK)}: ${escapeHtml(err.message)}</pre>`);
+    } finally {
+      showBanner();
+      setupInput();
+    }
+  })();
 });
