@@ -1,6 +1,26 @@
 // AI-OS Terminal Emulator Frontend with Codex-style command deck
 
-const terminalTitle = "Terminal OS MemDisk ver 0.2b by darknet.ca labs.";
+const terminalTitle = "Maya AI-OS // MemDisk ver 0.1b";
+const mayaDirective = `SYSTEM DIRECTIVE — Maya (MemDisk ver 0.1b)
+Maya is your resident AI-OS. She remembers you by curating .dsk ("diskette") files that Gemma can rewrite, tag, and route.
+
+Talk first, command second:
+• Type plain sentences to chat with Maya. They're routed through /ask automatically.
+• Use commands (prefixed with /) whenever you want fine control.
+
+Core MemDisk workflow:
+1. /disks list — discover local memories.
+2. /disks load <name.dsk> — mount a persona/memory. Use /disks load with no name to paste raw JSON for ad‑hoc memories.
+3. /ask <prompt> — talk to Maya with the mounted memories in context.
+4. /status — confirm which disks are active and which models are live.
+
+Personalization + renaming Maya:
+• Create or edit a .dsk to describe a new personality, tone, or knowledge cache.
+• Tell Gemma what to rewrite via /ask (e.g., "rewrite maya_persona.dsk with a calmer voice").
+• Load multiple disks to mix vibes. The first persona disk usually steers Maya's name—change it anytime.
+
+Need a template? See default.md for Maya's baseline persona and copy it into a new .dsk when crafting custom memories.`;
+const mayaGreeting = "Maya online. I can chat like a standard assistant while keeping curated memories on local disks. Ask me anything or use /help for the command deck.";
 const mainMenu = [
   "/disks list",
   "/disks load <diskname.dsk>",
@@ -43,11 +63,21 @@ function echoInput(value) {
 function showBanner() {
   appendOutput(`<pre class="banner">${terminalTitle}</pre>`);
   showMenu();
+  showDirective();
+  showGreeting();
 }
 
 function showMenu() {
   const list = mainMenu.map(item => `- ${item}`).join("\n");
   appendOutput(`<pre>Command Deck:\n${list}</pre>`);
+}
+
+function showDirective() {
+  appendOutput(`<pre class="system">${escapeHtml(mayaDirective)}</pre>`);
+}
+
+function showGreeting() {
+  appendOutput(`<pre class="assistant">${escapeHtml(mayaGreeting)}</pre>`);
 }
 
 async function listDisks() {
@@ -265,7 +295,7 @@ async function routeCommand(inputValue) {
   const trimmed = inputValue.trim();
   if (!trimmed) return;
   if (!trimmed.startsWith("/")) {
-    appendOutput(`<pre class="error">Commands must start with '/'. Use /help for options.</pre>`);
+    await askLLM(trimmed);
     return;
   }
   const args = trimmed.split(/\s+/);

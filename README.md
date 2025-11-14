@@ -121,6 +121,10 @@ The AI-OS web terminal uses slash commands that mirror the `frontend/terminal.js
 
 Each `/ask` call shows the sanitized OpenRouter response plus an expandable "Routing" block that reveals which disks Gemma selected, why they were chosen, and the raw classifier output. Inline disks you compose through the raw loader are tagged as `[inline]` so you know which memories came from the current session.
 
+## Default Persona & Chat UX
+
+Maya is the default AI-OS persona (MemDisk ver 0.1b). She behaves like a regular chatbot—type normal sentences and the terminal automatically routes them through `/ask`. The banner prints a **system directive** describing how to mount disks, personalize the experience, and even rename Maya. That directive lives in [`default.md`](default.md); use it as a template for crafting new `.dsk` personas. Load a custom disk with `/disks load <persona.dsk>` (or the raw loader) and Maya will immediately adopt the new voice while still supporting the command deck.
+
 ## License
 
 MIT /  Apache 2.0 
