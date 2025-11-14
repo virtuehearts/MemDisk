@@ -105,18 +105,21 @@ Open `frontend/index.html` in your browser (or serve the `frontend/` folder with
 
 ## Terminal Commands
 
-Inside the browser terminal UI you can run:
+The AI-OS web terminal uses slash commands that mirror the `frontend/terminal.js` command deck. The most common ones are:
 
-```
-disks                 # list .dsk files inside /disk
-load example.dsk      # load a floppy into the current session
-mem                   # show currently mounted disks
-ask write a poem ...  # send the prompt + mounted floppies to OpenRouter (after Gemma curates)
-clear                 # clear the terminal
-help                  # see this list again
-```
+| Command | Description |
+| --- | --- |
+| `/disks list` | List every `.dsk` file discovered under `/disk`. |
+| `/disks load <name>` | Mount a floppy from the backend so Gemma can inspect it. |
+| `/disks load` (raw) | Enter interactive mode to paste inline JSON/text that becomes a temporary disk. Finish by pasting the content; `/cancel` aborts. |
+| `/disks download <name>` | Request a gzipped copy of a mounted disk from the server. |
+| `/status` | Show backend health (LLM mode, database state, etc.). |
+| `/model list` / `/model <id>` | Inspect OpenRouter model options or set the active upstream model. |
+| `/ask <prompt>` | Send your question plus the mounted disks to Gemma for routing and OpenRouter for the final answer. |
+| `/clear` | Reset the visible terminal output. |
+| `/help` or `/menu` | Reprint the command deck banner. |
 
-Each `ask` call shows the sanitized OpenRouter response plus an expandable "Routing" block that reveals which disks Gemma selected, why they were chosen, and the raw classifier output.
+Each `/ask` call shows the sanitized OpenRouter response plus an expandable "Routing" block that reveals which disks Gemma selected, why they were chosen, and the raw classifier output. Inline disks you compose through the raw loader are tagged as `[inline]` so you know which memories came from the current session.
 
 ## License
 
