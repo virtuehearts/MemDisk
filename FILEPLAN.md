@@ -16,12 +16,14 @@ This file details the intended project structure for MemDisk 0.1B, a peer-to-pee
 - **crypto.js** — SHA256, Bitcoin wallet keygen, encryption routines
 - **db.js** — SQLite schema/init
 - **openrouter.js** — API wrapper for main LLM session
+- **localLLM.js** — Abstraction over local Gemma runner (Ollama/mock)
 - **commands.js** — CLI-style command manager for terminal frontend
 
 ## Frontend Directory: `/frontend`
 
 - **index.html** — Terminal AI-OS web UI
 - **terminal.js** — Terminal emulator with command handling
+- `disks`, `load`, `mem`, `ask`, `clear`, `help` commands wired to backend routing metadata
 - **style.css** — Styling for terminal interface
 
 ## Disk Directory: `/disk`
